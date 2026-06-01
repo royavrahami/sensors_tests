@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Load environment variables
 load_dotenv(dotenv_path=r'config/.env')
 sensors_file_path = os.getenv('SENSOR_DETAILS_PATH')
-PASSWORD_SENSORZ = os.getenv('PASSWORD_SENSORZ')
+SSH_PASSWORD = os.getenv('SSH_PASSWORD')
 
 
 def load_sensor_details(file_path: str):
@@ -69,12 +69,12 @@ def process_sensor(sensor: dict):
     failed_to_install = []
 
     for tool in tools_to_check:
-        stdout, _ = run_ssh_command(ip_address_sensor, username_sensorz, PASSWORD_SENSORZ, f'which {tool}')
+        stdout, _ = run_ssh_command(ip_address_sensor, username_sensorz, SSH_PASSWORD, f'which {tool}')
         if stdout.strip():
             already_installed.append(tool)
             logging.info(f"{hostname} ({ip_address_sensor}): {tool} - already installed")
         else:
-            stderr = detect_package_manager_and_install(ip_address_sensor, username_sensorz, PASSWORD_SENSORZ, tool)
+            stderr = detect_package_manager_and_install(ip_address_sensor, username_sensorz, SSH_PASSWORD, tool)
             if 'is already the newest version' in stderr or 'newly installed' in stderr:
                 installed_tools.append(tool)
                 logging.info(f"{hostname} ({ip_address_sensor}): {tool} - installed")
@@ -84,7 +84,7 @@ def process_sensor(sensor: dict):
 
     # Perform ping test
     logging.info(f"{hostname} ({ip_address_sensor}): Starting ping test")
-    stdout, _ = run_ssh_command(ip_address_sensor, username_sensorz, PASSWORD_SENSORZ, 'ping -c 4 8.8.8.8')
+    stdout, _ = run_ssh_command(ip_address_sensor, username_sensorz, SSH_PASSWORD, 'ping -c 4 8.8.8.8')
     ping_results = re.search(r'--- 8.8.8.8 ping statistics ---\n(.*)', stdout, re.DOTALL)
     ping_output = ping_results.group(1).strip() if ping_results else 'Ping test failed'
 

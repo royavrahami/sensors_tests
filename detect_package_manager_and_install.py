@@ -21,7 +21,7 @@ paramiko.util.log_to_file(os.path.join('logs', 'paramiko.log'), level='INFO')
 # Load environment variables
 load_dotenv(dotenv_path=r'config/.env')
 sensors_file_path = os.getenv('SENSOR_DETAILS_PATH')
-PASSWORD_SENSORZ = os.getenv('PASSWORD_SENSORZ')
+SSH_PASSWORD = os.getenv('SSH_PASSWORD')
 
 
 def can_ping(ip_address: str) -> tuple:
@@ -162,7 +162,7 @@ def process_sensor(sensor: dict) -> str:
     """Process each sensor for updates, tool checks, installations, and a ping test."""
     ip_address_sensor = sensor['ip_address_sensor']
     username_sensorz = sensor['username_sensorz']
-    password_sensorz = PASSWORD_SENSORZ
+    password_sensorz = SSH_PASSWORD
     logging.info(f"Processing sensor at {ip_address_sensor}")
     ping_success, ping_output = can_ping(ip_address_sensor)
     if not ping_success:

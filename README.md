@@ -36,7 +36,7 @@ connectivity and tooling checks, and produces HTML/YAML reports.
 2. Create `config/.env` (git-ignored) with your settings:
    ```dotenv
    # SSH password used to authenticate to the devices
-   PASSWORD_SENSORZ=your-ssh-password
+   SSH_PASSWORD=your-ssh-password
 
    # Path to the sensor inventory file (YAML/JSON)
    SENSOR_DETAILS_PATH=config/sensors.yml
@@ -53,7 +53,7 @@ connectivity and tooling checks, and produces HTML/YAML reports.
 
 | Variable | Required | Default | Description |
 | -------- | :------: | ------- | ----------- |
-| `PASSWORD_SENSORZ` | ✅ | – | SSH password for the devices. |
+| `SSH_PASSWORD` | ✅ | – | SSH password for the devices. |
 | `SENSOR_DETAILS_PATH` | ✅ | – | Inventory file describing each device (hostname/IP). |
 | `TESTS_DEFINITIONS_PATH` | ✅ | – | Test definitions consumed by `sensor_tests.py`. |
 | `REPORTS_DIRECTORY` | ❌ | `reports` | Output directory for generated reports. |
