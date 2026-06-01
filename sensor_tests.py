@@ -15,11 +15,11 @@ load_dotenv(dotenv_path=os.getenv("SENSORZ_ENV_PATH", os.path.join("config", ".e
 
 sensors_file_path = os.getenv('SENSOR_DETAILS_PATH')
 reports_directory = os.getenv('REPORTS_DIRECTORY')
-password_sensorz = os.getenv('PASSWORD_SENSORZ')
+password_sensorz = os.getenv('SSH_PASSWORD')
 
 assert sensors_file_path is not None, "SENSOR_DETAILS_PATH is not set"
 assert reports_directory is not None, "REPORTS_DIRECTORY is not set"
-assert password_sensorz is not None, "PASSWORD_SENSORZ is not set"
+assert password_sensorz is not None, "SSH_PASSWORD is not set"
 
 print("Environment variables loaded successfully.")
 

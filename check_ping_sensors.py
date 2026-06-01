@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Load environment variables from the specified .env file.
 load_dotenv(dotenv_path=r'config/.env')
 sensors_file_path = os.getenv('SENSOR_DETAILS_PATH')
-password_sensorz = os.getenv('PASSWORD_SENSORZ')
+password_sensorz = os.getenv('SSH_PASSWORD')
 
 # Ensure that both required environment variables are set.
 assert sensors_file_path and password_sensorz, "Required environment variables are not set."
