@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sensor Test Report - {{ report_date }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .sensor-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .sensor-table, .sensor-table th, .sensor-table td {
+            border: 1px solid #ddd;
+        }
+        .sensor-table th, .sensor-table td {
+            padding: 8px;
+            text-align: left;
+        }
+        .sensor-table th {
+            background-color: #f2f2f2;
+        }
+        .sensor-table tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+        .sensor-table .pass {
+            color: green;
+        }
+        .sensor-table .fail {
+            color: red;
+        }
+        .sensor-table .test-name {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sensor Test Report</h1>
+    <p>Date Generated: {{ report_date }}</p>
+    {% for sensor in sensors %}
+        <h2>Sensor IP: {{ sensor.ip_address }}</h2>
+        <table class="sensor-table">
+            {% for category, tests in sensor.results.items() %}
+                <tr>
+                    <th colspan="2">{{ category }}</th>
+                </tr>
+                {% for test in tests %}
+                    <tr>
+                        <td class="test-name">{{ test.test_name }}</td>
+                        <td class="{{ 'pass' if test.status == 'Passed' else 'fail' }}">
+                            {{ test.output }}
+                            <span>{{ test.status }}</span>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </table>
+    {% endfor %}
+</body>
+</html>

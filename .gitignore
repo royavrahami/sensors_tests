@@ -1,0 +1,27 @@
+# ── Environment / secrets ────────────────────────────────────────────────────
+.env
+*.env
+config/.env
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+# Paramiko/SSH transcripts can contain host keys, negotiated ciphers and
+# internal IPs. Never commit them.
+*.log
+logs/
+
+# ── Generated reports / run artifacts ────────────────────────────────────────
+reports/
+*.html.out
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# ── OS / IDE ─────────────────────────────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
