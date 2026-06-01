@@ -2,3 +2,7 @@ paramiko>=3.4
 PyYAML>=6.0
 python-dotenv>=1.0
 Jinja2>=3.1
+
+# Dev/test
+pytest>=8.0
+ruff>=0.4

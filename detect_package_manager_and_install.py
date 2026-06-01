@@ -1,13 +1,12 @@
 import logging
 import os
-import socket
-import subprocess
 from functools import wraps
 
 import concurrent.futures  # Corrected import
 import paramiko
-import yaml
 from dotenv import load_dotenv
+
+from ssh_utils import can_ping, load_sensor_details, update_ip_prefix
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -22,43 +21,6 @@ paramiko.util.log_to_file(os.path.join('logs', 'paramiko.log'), level='INFO')
 load_dotenv(dotenv_path=r'config/.env')
 sensors_file_path = os.getenv('SENSOR_DETAILS_PATH')
 SSH_PASSWORD = os.getenv('SSH_PASSWORD')
-
-
-def can_ping(ip_address: str) -> tuple:
-    """Check if an IP address is reachable using ping and return the ping output and success status."""
-    command = ['ping', '-n', '1', ip_address] if os.name == 'nt' else ['ping', '-c', '1', ip_address]
-    try:
-        response = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10)
-        output = response.stdout.decode().strip()
-        success = response.returncode == 0
-        logging.info(f"Ping stdout for {ip_address}: {output}")
-        return success, output
-    except subprocess.TimeoutExpired:
-        error_msg = "Ping request timed out."
-        logging.error(f"{error_msg} for {ip_address}")
-        return False, error_msg
-    except Exception as e:
-        error_msg = f"Failed to execute ping: {e}"
-        logging.error(f"{error_msg} on {ip_address}")
-        return False, error_msg
-
-
-def can_connect(ip_address: str, port: int = 80, timeout: int = 30) -> bool:
-    """Check if a TCP connection to a specific port is possible and return boolean result."""
-    try:
-        with socket.create_connection((ip_address, port), timeout=timeout):
-            logging.info(f"Successfully connected to {ip_address}:{port}")
-            return True
-    except socket.error as e:
-        logging.error(f"Failed to connect to {ip_address}:{port}: {e}")
-        return False
-
-
-def update_ip_prefix(sensor: dict, new_prefix: str) -> None:
-    """Update the IP prefix of a sensor based on its current setting."""
-    parts = sensor['ip_address_sensor'].split('.')
-    parts[0], parts[1] = new_prefix.split('.')[:2]
-    sensor['ip_address_sensor'] = '.'.join(parts)
 
 
 def retry(f):
@@ -84,19 +46,6 @@ def retry(f):
                 return f"IP {sensor['ip_address_sensor']} is not reachable."
 
     return wrapper_retry
-
-
-def load_sensor_details(file_path: str) -> list:
-    """Load sensor details from a YAML file."""
-    try:
-        with open(file_path) as file:
-            return yaml.safe_load(file) or []
-    except FileNotFoundError as e:
-        logging.error(f"Error loading sensor details: {e}")
-        return []
-    except Exception as e:
-        logging.error(f"Error reading the file: {e}")
-        return []
 
 
 def run_ssh_command(ip_address_sensor: str, username_sensorz: str, password_sensorz: str, command: str) -> tuple:
