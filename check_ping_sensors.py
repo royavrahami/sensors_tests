@@ -1,13 +1,14 @@
 import concurrent.futures
 import logging
 import os
-import subprocess
 from datetime import datetime
 from functools import wraps
 
 import paramiko
 import yaml
 from dotenv import load_dotenv
+
+from ssh_utils import can_ping, load_sensor_details, update_ip_prefix
 
 # Initialize a list to track unreachable sensors.
 sensor_status = []
@@ -25,18 +26,6 @@ password_sensorz = os.getenv('SSH_PASSWORD')
 assert sensors_file_path and password_sensorz, "Required environment variables are not set."
 
 
-def load_sensor_details(file_path: str) -> dict:
-    """Load sensor details from a YAML file."""
-    with open(file_path) as file:
-        return yaml.safe_load(file)
-
-
-def can_ping(ip_address: str) -> bool:
-    """Check if an IP address is reachable using ping."""
-    response = subprocess.run(['ping', '-c', '1', ip_address], stdout=subprocess.PIPE)
-    return response.returncode == 0
-
-
 def retry(f):
     """Decorator to retry sensor operations with an updated IP address."""
 
@@ -49,7 +38,7 @@ def retry(f):
             original_ip = sensor['ip_address_sensor']
             new_prefix = '10.3' if original_ip.startswith('10.8') else '10.8'
             updated_sensor = update_ip_prefix(sensor, new_prefix=new_prefix)
-            if can_ping(updated_sensor['ip_address_sensor']):
+            if can_ping(updated_sensor['ip_address_sensor'])[0]:
                 try:
                     return f(updated_sensor, *args, **kwargs)
                 except Exception as second_try_error:
@@ -65,13 +54,6 @@ def retry(f):
             return None
 
     return wrapper_retry
-
-
-def update_ip_prefix(sensor: dict, new_prefix: str) -> dict:
-    parts = sensor['ip_address_sensor'].split('.')
-    parts[0], parts[1] = new_prefix.split('.')[:2]
-    sensor['ip_address_sensor'] = '.'.join(parts)
-    return sensor
 
 
 @retry
@@ -99,7 +81,6 @@ def execute_tests(sensor_details: list) -> dict:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = {executor.submit(ping_test, sensor): sensor for sensor in sensor_details}
         for future in concurrent.futures.as_completed(futures):
-            var = futures[future]
             result = future.result()
             if result:
                 results['Passed' if result['ping_status'] == 'Pass' else 'Failed'].append(result)

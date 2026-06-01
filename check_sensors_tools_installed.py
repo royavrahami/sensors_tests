@@ -2,9 +2,11 @@ import concurrent.futures
 import logging
 import os
 import re
-import yaml
-from dotenv import load_dotenv
+
 import paramiko
+from dotenv import load_dotenv
+
+from ssh_utils import load_sensor_details
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -13,19 +15,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 load_dotenv(dotenv_path=r'config/.env')
 sensors_file_path = os.getenv('SENSOR_DETAILS_PATH')
 SSH_PASSWORD = os.getenv('SSH_PASSWORD')
-
-
-def load_sensor_details(file_path: str):
-    """Load sensor details from YAML file."""
-    try:
-        with open(file_path) as file:
-            return yaml.safe_load(file)
-    except FileNotFoundError as e:
-        logging.error(f"Error loading sensor details: {e}")
-        return []
-    except Exception as e:
-        logging.error(f"Error reading the file: {e}")
-        return []
 
 
 def run_ssh_command(ip_address_sensor: str, username_sensorz: str, sensorz_password: str, command: str):

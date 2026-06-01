@@ -4,10 +4,10 @@ import logging
 import os
 from datetime import datetime
 
-import paramiko
-import yaml
 from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader
+
+from ssh_utils import load_sensor_details, run_ssh_command
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -33,36 +33,6 @@ def load_tests(file_path):
         return tests
 
 
-def load_sensor_details(file_path):
-    assert os.path.isfile(file_path), "Sensor details file {} does not exist.".format(file_path)
-    with open(file_path) as file:
-        sensor_details = yaml.safe_load(file)
-        assert isinstance(sensor_details, list), "Sensor details file format is incorrect. Expected a list."
-        print("Sensor details loaded.")
-        return sensor_details
-
-
-def run_ssh_command(ip_address_sensor, username_sensorz, sensorz_password, command):
-    client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    try:
-        client.connect(hostname=ip_address_sensor, username=username_sensorz, password=sensorz_password)
-        logging.info("Connected to {}".format(ip_address_sensor))
-        stdin, stdout, stderr = client.exec_command("sudo " + command)
-        output = stdout.read().decode()
-        error = stderr.read().decode()
-        if error:
-            logging.error("Error executing {} on {}: {}".format(command, ip_address_sensor, error))
-            return False, error
-        print("Command executed successfully on {}.".format(ip_address_sensor))
-        return True, output
-    except Exception as e:
-        logging.error("Connection or execution failed for {}: {}".format(ip_address_sensor, str(e)))
-        return False, str(e)
-    finally:
-        client.close()
-
-
 def run_test_on_sensor(sensor, tests):
     ip_address_sensor = sensor['ip_address_sensor']  # Correct key for IP address
     hostname_sensor = sensor['hostname']  # Assuming 'hostname' is correct
@@ -79,7 +49,9 @@ def run_test_on_sensor(sensor, tests):
         category_results = []
         for test in test_commands:
             logging.info("Executing test: {} on sensor: {} {}".format(test['name'], hostname_sensor, ip_address_sensor))
-            success, output = run_ssh_command(ip_address_sensor, username_sensorz, Password_sensorz, test['command'])
+            success, output = run_ssh_command(
+                ip_address_sensor, username_sensorz, Password_sensorz, test['command'], use_sudo=True
+            )
             test_status = "Passed" if success else "Failed"
             category_results.append({
                 "test_name": test['name'],
